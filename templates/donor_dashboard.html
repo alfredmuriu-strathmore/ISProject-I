@@ -2,65 +2,67 @@
 
 {% block content %}
 
-<div class="card">
-    <div class="row-between">
+<div class="page-head">
+    <div class="ph-title">
+        <span class="ph-mark"></span>
         <div>
             <h1>Welcome, {{ user.username }}</h1>
-            <p class="muted">Your donor profile and eligibility at a glance.</p>
-        </div>
-        <div>
-            <a href="{% url 'donor_profile' %}" class="btn">Edit Profile</a>
-            <a href="{% url 'book_appointment' %}" class="btn btn-primary">Book Appointment</a>
+            <p class="sub">Your donor profile and eligibility at a glance</p>
         </div>
     </div>
-
-    <div class="metrics">
-        <div class="metric">
-            <div class="label">Blood Type</div>
-            <div class="value">{{ donor.blood_type|default:"—" }}</div>
-        </div>
-        <div class="metric">
-            <div class="label">County</div>
-            <div class="value">{{ donor.county|default:"—" }}</div>
-        </div>
-        <div class="metric">
-            <div class="label">Next Eligible Date</div>
-            <div class="value">{{ next_date }}</div>
-        </div>
+    <div class="ph-actions">
+        <a href="{% url 'donor_profile' %}" class="btn">Edit Profile</a>
+        <a href="{% url 'book_appointment' %}" class="btn btn-primary">Book Appointment</a>
     </div>
+</div>
 
+<div class="metrics">
+    <div class="metric">
+        <div class="label">Blood Type</div>
+        <div class="value">{{ donor.blood_type|default:"—" }}</div>
+    </div>
+    <div class="metric">
+        <div class="label">County</div>
+        <div class="value" style="font-size:19px;">{{ donor.county|default:"—" }}</div>
+    </div>
+    <div class="metric">
+        <div class="label">Next Eligible Date</div>
+        <div class="value" style="font-size:19px;">{{ next_date }}</div>
+    </div>
+</div>
+
+<div style="margin-top:20px;">
     {% if donor.is_eligible %}
         <div class="banner banner-ok">You meet all requirements and are eligible to donate.</div>
     {% else %}
         <div class="banner banner-bad">
             <strong>Not eligible to donate yet.</strong>
             <ul style="margin:8px 0 0; padding-left:18px;">
-                {% for issue in donor.eligibility_issues %}
-                    <li>{{ issue }}</li>
-                {% endfor %}
+                {% for issue in donor.eligibility_issues %}<li>{{ issue }}</li>{% endfor %}
             </ul>
         </div>
     {% endif %}
 </div>
 
-<div class="card" style="margin-top:20px;">
-    <h2>My Appointments &amp; Donation History</h2>
+<div class="table-card" style="margin-top:22px;">
+    <div class="tc-head"><h2>My Appointments &amp; Donation History</h2></div>
     {% if appointments %}
-        <table style="width:100%; border-collapse:collapse;">
-            <tr style="text-align:left; border-bottom:1px solid #d6d6d6;">
-                <th>Hospital</th><th>Date</th><th>Status</th>
-            </tr>
+    <table class="data-table">
+        <thead><tr><th>Hospital</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
             {% for a in appointments %}
-            <tr style="border-bottom:1px solid #eee;">
-                <td>{{ a.hospital.name }}</td>
+            <tr>
+                <td><strong>{{ a.hospital.name }}</strong></td>
                 <td>{{ a.date }}</td>
-                <td>{{ a.get_status_display }}</td>
+                <td>
+                    {% if a.status == 'completed' %}<span class="badge badge-ok">Completed</span>
+                    {% elif a.status == 'cancelled' %}<span class="badge badge-muted">Cancelled</span>
+                    {% else %}<span class="badge badge-info">{{ a.get_status_display }}</span>{% endif %}
+                </td>
             </tr>
             {% endfor %}
-        </table>
-    {% else %}
-        <p class="muted">No appointments yet.</p>
-    {% endif %}
+        </tbody>
+    </table>
+    {% else %}<div class="table-empty">No appointments yet.</div>{% endif %}
 </div>
-
 {% endblock %}

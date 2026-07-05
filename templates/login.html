@@ -1,26 +1,42 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+<style>
+    .auth-wrap { max-width: 430px; margin: 26px auto; }
+    .auth-card { padding: 34px 32px; }
+    .auth-head { text-align: center; margin-bottom: 26px; }
+    .auth-head .drop {
+        width: 46px; height: 46px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+        background: var(--red-soft); border-radius: 50% 50% 50% 0; transform: rotate(45deg);
+    }
+    .auth-head .drop svg { width: 22px; height: 22px; transform: rotate(-45deg); color: var(--red); }
+    .auth-head h1 { font-size: 23px; margin: 0 0 4px; }
+    .auth-head p { color: var(--muted); font-size: 14px; margin: 0; }
+    .auth-foot { text-align: center; margin-top: 18px; font-size: 14px; color: var(--muted); }
+    .auth-foot a { font-weight: 600; text-decoration: none; }
+</style>
 
-<div class="card" style="max-width:420px; margin:0 auto;">
-    <h1>Log in</h1>
-    <p class="muted">Sign in to reach your dashboard.</p>
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="field">
-            <label>Username</label>
-            <input type="text" name="username" placeholder="Enter username" required>
+<div class="auth-wrap">
+    <div class="card auth-card">
+        <div class="auth-head">
+            <h1>Welcome back</h1>
+            <p>Sign in to reach your dashboard.</p>
         </div>
 
-        <div class="field">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password" required>
-        </div>
-
-        <button class="btn btn-primary btn-block">Login</button>
-    </form>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter username" required autofocus>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+            <button class="btn btn-primary btn-block">Sign in</button>
+        </form>
+    </div>
+    <p class="auth-foot">New here? <a href="{% url 'register' %}">Create an account</a></p>
 </div>
-
 {% endblock %}

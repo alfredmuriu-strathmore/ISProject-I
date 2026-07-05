@@ -3,90 +3,93 @@
 {% block content %}
 
 {% if not hospital %}
-<div class="card">
-    <h1>Hospital Administrator</h1>
-    <div class="banner banner-bad">No hospital is linked to your account. Ask the system admin to set one up.</div>
+<div class="page-head">
+    <div class="ph-title"><span class="ph-mark"></span><div><h1>Hospital Administrator</h1></div></div>
 </div>
+<div class="banner banner-bad">No hospital is linked to your account. Ask the system admin to set one up.</div>
 {% else %}
 
-<div class="card">
-    <div class="row-between">
+<div class="page-head">
+    <div class="ph-title">
+        <span class="ph-mark"></span>
         <div>
             <h1>{{ hospital.name }}</h1>
-            <p class="muted">{{ hospital.county }} — blood inventory workspace.</p>
-        </div>
-        <div>
-            <a href="{% url 'add_unit' %}" class="btn">Add Blood Unit</a>
-            <a href="{% url 'create_request' %}" class="btn btn-primary">New Blood Request</a>
+            <p class="sub">{{ hospital.county }} &middot; blood inventory workspace</p>
         </div>
     </div>
-
-    <div class="metrics">
-        {% for type, count in stock.items %}
-        <div class="metric">
-            <div class="label">{{ type }}</div>
-            <div class="value">{{ count }}</div>
-        </div>
-        {% endfor %}
+    <div class="ph-actions">
+        <a href="{% url 'add_unit' %}" class="btn">+ Add Blood Unit</a>
+        <a href="{% url 'create_request' %}" class="btn btn-primary">New Blood Request</a>
     </div>
 </div>
 
-<div class="card" style="margin-top:20px;">
-    <h2>Expiry Alerts</h2>
-    {% if expiring %}
-        {% for u in expiring %}
-        <div class="banner banner-bad" style="margin-bottom:8px;">
-            {{ u.blood_type }} unit expires in {{ u.days_to_expiry }} day(s) — {{ u.expiry_date }}.
-        </div>
-        {% endfor %}
-    {% else %}
-        <p class="muted">No units expiring within 7 days.</p>
-    {% endif %}
+<div class="metrics" style="grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));">
+    {% for type, count in stock.items %}
+    <div class="metric">
+        <div class="label">{{ type }}</div>
+        <div class="value">{{ count }}</div>
+    </div>
+    {% endfor %}
 </div>
 
-<div class="card" style="margin-top:20px;">
-    <h2>Current Stock</h2>
+{% if expiring %}
+<div style="margin-top:22px;">
+    {% for u in expiring %}
+    <div class="banner banner-bad" style="margin-bottom:8px;">
+        <strong>{{ u.blood_type }}</strong> unit expires in {{ u.days_to_expiry }} day(s) &mdash; {{ u.expiry_date }}.
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="table-card" style="margin-top:22px;">
+    <div class="tc-head"><h2>Current Stock</h2></div>
     {% if units %}
-    <table style="width:100%; border-collapse:collapse;">
-        <tr style="text-align:left; border-bottom:1px solid #d6d6d6;">
-            <th>Blood Type</th><th>Collected</th><th>Expires</th><th>Days Left</th>
-        </tr>
-        {% for u in units %}
-        <tr style="border-bottom:1px solid #eee;">
-            <td>{{ u.blood_type }}</td>
-            <td>{{ u.collection_date }}</td>
-            <td>{{ u.expiry_date }}</td>
-            <td>{{ u.days_to_expiry }}</td>
-        </tr>
-        {% endfor %}
+    <table class="data-table">
+        <thead><tr><th>Blood Type</th><th>Collected</th><th>Expires</th><th>Days Left</th></tr></thead>
+        <tbody>
+            {% for u in units %}
+            <tr>
+                <td><strong>{{ u.blood_type }}</strong></td>
+                <td>{{ u.collection_date }}</td>
+                <td>{{ u.expiry_date }}</td>
+                <td>
+                    {% if u.days_to_expiry <= 7 %}<span class="badge badge-wait">{{ u.days_to_expiry }} days</span>
+                    {% else %}<span class="badge badge-ok">{{ u.days_to_expiry }} days</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    {% else %}
-        <p class="muted">No blood units in stock.</p>
-    {% endif %}
+    {% else %}<div class="table-empty">No blood units in stock.</div>{% endif %}
 </div>
 
-<div class="card" style="margin-top:20px;">
-    <h2>My Blood Requests</h2>
+<div class="table-card" style="margin-top:22px;">
+    <div class="tc-head"><h2>My Blood Requests</h2></div>
     {% if requests %}
-    <table style="width:100%; border-collapse:collapse;">
-        <tr style="text-align:left; border-bottom:1px solid #d6d6d6;">
-            <th>Blood Type</th><th>Units</th><th>Priority</th><th>Status</th><th>Date</th>
-        </tr>
-        {% for r in requests %}
-        <tr style="border-bottom:1px solid #eee;">
-            <td>{{ r.blood_type }}</td>
-            <td>{{ r.units_needed }}</td>
-            <td>{{ r.get_priority_display }}</td>
-            <td>{{ r.get_status_display }}</td>
-            <td>{{ r.created_at|date:"Y-m-d" }}</td>
-        </tr>
-        {% endfor %}
+    <table class="data-table">
+        <thead><tr><th>Blood Type</th><th>Units</th><th>Priority</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+            {% for r in requests %}
+            <tr>
+                <td><strong>{{ r.blood_type }}</strong></td>
+                <td>{{ r.units_needed }}</td>
+                <td>
+                    {% if r.priority == 'critical' %}<span class="badge badge-crit">Critical</span>
+                    {% elif r.priority == 'urgent' %}<span class="badge badge-wait">Urgent</span>
+                    {% else %}<span class="badge badge-muted">Normal</span>{% endif %}
+                </td>
+                <td>
+                    {% if r.status == 'fulfilled' %}<span class="badge badge-ok">Fulfilled</span>
+                    {% else %}<span class="badge badge-info">{{ r.get_status_display }}</span>{% endif %}
+                </td>
+                <td>{{ r.created_at|date:"Y-m-d" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    {% else %}
-        <p class="muted">No requests submitted.</p>
-    {% endif %}
+    {% else %}<div class="table-empty">No requests submitted.</div>{% endif %}
 </div>
 
 {% endif %}
-
 {% endblock %}

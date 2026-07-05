@@ -2,56 +2,66 @@
 
 {% block content %}
 
-<div class="card">
-    <h1>Ambulance Operator</h1>
-    {% if ambulance %}
-        <p class="muted">{{ ambulance.plate_number }} — {{ ambulance.county }}</p>
-        <div class="metrics">
-            <div class="metric">
-                <div class="label">Status</div>
-                <div class="value">{% if ambulance.is_available %}Available{% else %}On Dispatch{% endif %}</div>
-            </div>
-            <div class="metric">
-                <div class="label">County</div>
-                <div class="value">{{ ambulance.county }}</div>
-            </div>
+<div class="page-head">
+    <div class="ph-title">
+        <span class="ph-mark"></span>
+        <div>
+            <h1>Ambulance Operator</h1>
+            {% if ambulance %}<p class="sub">{{ ambulance.plate_number }} &middot; {{ ambulance.county }}</p>{% endif %}
         </div>
-    {% else %}
-        <div class="banner banner-bad">No ambulance is linked to your account.</div>
-    {% endif %}
+    </div>
 </div>
 
 {% if ambulance %}
-<div class="card" style="margin-top:20px;">
-    <h2>My Dispatches</h2>
-    {% if dispatches %}
-    <table style="width:100%; border-collapse:collapse;">
-        <tr style="text-align:left; border-bottom:1px solid #d6d6d6;">
-            <th>Hospital</th><th>Blood Type</th><th>Units</th><th>Status</th><th>Action</th>
-        </tr>
-        {% for d in dispatches %}
-        <tr style="border-bottom:1px solid #eee;">
-            <td>{{ d.request.hospital.name }}</td>
-            <td>{{ d.request.blood_type }}</td>
-            <td>{{ d.request.units_needed }}</td>
-            <td>{{ d.get_status_display }}</td>
-            <td>
-                {% if d.status == 'dispatched' %}
-                <form method="post" action="{% url 'complete_dispatch' d.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn">Mark Delivered</button>
-                </form>
-                {% else %}
-                    —
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-        <p class="muted">No dispatches yet.</p>
-    {% endif %}
+<div class="metrics">
+    <div class="metric">
+        <div class="label">Status</div>
+        <div class="value" style="font-size:19px;">
+            {% if ambulance.is_available %}<span class="badge badge-ok">Available</span>
+            {% else %}<span class="badge badge-wait">On Dispatch</span>{% endif %}
+        </div>
+    </div>
+    <div class="metric">
+        <div class="label">Plate</div>
+        <div class="value" style="font-size:19px;">{{ ambulance.plate_number }}</div>
+    </div>
+    <div class="metric">
+        <div class="label">County</div>
+        <div class="value" style="font-size:19px;">{{ ambulance.county }}</div>
+    </div>
 </div>
-{% endif %}
 
+<div class="table-card" style="margin-top:22px;">
+    <div class="tc-head"><h2>My Dispatches</h2></div>
+    {% if dispatches %}
+    <table class="data-table">
+        <thead><tr><th>Collect From</th><th>Deliver To</th><th>Blood Type</th><th>Units</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead>
+        <tbody>
+            {% for d in dispatches %}
+            <tr>
+                <td><strong>{{ d.source_hospital.name|default:"—" }}</strong></td>
+                <td>{{ d.request.hospital.name }}</td>
+                <td>{{ d.request.blood_type }}</td>
+                <td>{{ d.request.units_needed }}</td>
+                <td>
+                    {% if d.status == 'delivered' %}<span class="badge badge-ok">Delivered</span>
+                    {% else %}<span class="badge badge-info">{{ d.get_status_display }}</span>{% endif %}
+                </td>
+                <td style="text-align:right;">
+                    {% if d.status == 'dispatched' %}
+                    <form method="post" action="{% url 'complete_dispatch' d.id %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" style="padding:7px 14px;">Mark Delivered</button>
+                    </form>
+                    {% else %}&mdash;{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<div class="table-empty">No dispatches yet.</div>{% endif %}
+</div>
+{% else %}
+<div class="banner banner-bad">No ambulance is linked to your account.</div>
+{% endif %}
 {% endblock %}

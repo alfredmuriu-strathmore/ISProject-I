@@ -1,42 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .auth-wrap { max-width: 500px; margin: 26px auto; }
+    .auth-card { padding: 34px 32px; }
+    .auth-head { text-align: center; margin-bottom: 24px; }
+    .auth-head .drop {
+        width: 46px; height: 46px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+        background: var(--red-soft); border-radius: 50% 50% 50% 0; transform: rotate(45deg);
+    }
+    .auth-head .drop svg { width: 22px; height: 22px; transform: rotate(-45deg); color: var(--red); }
+    .auth-head h1 { font-size: 23px; margin: 0 0 4px; }
+    .auth-head p { color: var(--muted); font-size: 14px; margin: 0; }
+    .auth-foot { text-align: center; margin-top: 18px; font-size: 14px; color: var(--muted); }
+    .auth-foot a { font-weight: 600; text-decoration: none; }
+</style>
 
-<div class="card" style="max-width:480px; margin:0 auto;">
-    <h1>Create an account</h1>
-    <p class="muted">Choose your role to be sent to the right dashboard after login.</p>
+<div class="auth-wrap">
+    <div class="card auth-card">
+        <div class="auth-head">
+            <h1>Create your account</h1>
+            <p>Choose your role to reach the right dashboard after login.</p>
+        </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-        <p>{{ form.username.label_tag }} {{ form.username }} {{ form.username.errors }}</p>
-        <p>{{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}</p>
-        <p>{{ form.role.label_tag }} {{ form.role }} {{ form.role.errors }}</p>
+            <p>{{ form.username.label_tag }} {{ form.username }} {{ form.username.errors }}</p>
+            <p>{{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}</p>
+            <p>{{ form.role.label_tag }} {{ form.role }} {{ form.role.errors }}</p>
+            <p id="blood-type-field">{{ form.blood_type.label_tag }} {{ form.blood_type }} {{ form.blood_type.errors }}</p>
+            <p>{{ form.password1.label_tag }} {{ form.password1 }} {{ form.password1.errors }}</p>
+            <p>{{ form.password2.label_tag }} {{ form.password2 }} {{ form.password2.errors }}</p>
 
-        <p id="blood-type-field">{{ form.blood_type.label_tag }} {{ form.blood_type }} {{ form.blood_type.errors }}</p>
-
-        <p>{{ form.password1.label_tag }} {{ form.password1 }} {{ form.password1.errors }}</p>
-        <p>{{ form.password2.label_tag }} {{ form.password2 }} {{ form.password2.errors }}</p>
-
-        <button class="btn btn-primary btn-block">Register</button>
-    </form>
+            <button class="btn btn-primary btn-block">Create account</button>
+        </form>
+    </div>
+    <p class="auth-foot">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
 </div>
 
 <script>
     var roleSelect = document.getElementById("id_role");
     var bloodField = document.getElementById("blood-type-field");
-
     function toggleBloodType() {
-        if (roleSelect.value === "donor") {
-            bloodField.style.display = "block";
-        } else {
-            bloodField.style.display = "none";
-        }
+        bloodField.style.display = (roleSelect.value === "donor") ? "block" : "none";
     }
-
     roleSelect.addEventListener("change", toggleBloodType);
     toggleBloodType();
 </script>
-
 {% endblock %}
