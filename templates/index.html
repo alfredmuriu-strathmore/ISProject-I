@@ -1,174 +1,177 @@
-{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Donation System — Give Blood, Save Lives</title>
+    <link rel="stylesheet" href="{% static 'landing/output.css' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/landing/favicon.svg' %}" />
+</head>
+<body>
+    <nav id="navbar" class="fixed z-50 flex items-center justify-between left-1/2 -translate-x-1/2 transition-all duration-500 p-4 md:px-16 lg:px-24 xl:px-32 w-full">
+        <a href="{% url 'index' %}">
+            <img id="navbar-logo" src="{% static 'img/logo-remove.png' %}" alt="Blood Donation System" class="transition-all duration-500" style="height:54px;width:auto;" />
+        </a>
 
-{% block content %}
-
-<style>
-    /* ---- Hero ---- */
-    .hero {
-        display: grid;
-        grid-template-columns: 1.05fr 1fr;
-        gap: 56px;
-        align-items: center;
-        padding: 32px 0 64px;
-    }
-    .hero h1 {
-        font-size: 46px;
-        line-height: 1.08;
-        letter-spacing: -0.02em;
-        margin: 0 0 20px;
-        color: var(--ink);
-    }
-    .hero p.lead {
-        color: var(--muted);
-        font-size: 17px;
-        max-width: 460px;
-        margin: 0 0 30px;
-    }
-    .hero .btn { margin-right: 10px; }
-    .hero .btn-lg { padding: 13px 24px; font-size: 15px; }
-
-    /* ---- Mock dashboard preview ---- */
-    .preview {
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 24px 50px -28px rgba(20, 22, 30, 0.28);
-        background: #fff;
-    }
-    .preview-bar {
-        display: flex;
-        gap: 7px;
-        padding: 13px 16px;
-        border-bottom: 1px solid var(--line);
-        background: #fbfbfc;
-    }
-    .preview-bar span {
-        width: 11px; height: 11px; border-radius: 50%;
-        background: #e0e2e6;
-    }
-    .preview-body { display: grid; grid-template-columns: 150px 1fr; }
-    .preview-side {
-        background: var(--red);
-        padding: 18px 14px;
-        display: flex; flex-direction: column; gap: 4px;
-    }
-    .preview-side a {
-        color: #f2cfd4; text-decoration: none; font-size: 13px;
-        padding: 8px 10px; border-radius: 7px; font-weight: 500;
-    }
-    .preview-side a.active { background: rgba(255,255,255,0.16); color: #fff; }
-    .preview-main { padding: 18px; }
-    .stat-row {
-        display: grid; grid-template-columns: repeat(3, 1fr);
-        border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
-        margin-bottom: 16px;
-    }
-    .stat {
-        padding: 12px 14px;
-        border-right: 1px solid var(--line);
-    }
-    .stat:last-child { border-right: 0; }
-    .stat .k { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-    .stat .v { font-size: 22px; font-weight: 700; margin-top: 2px; }
-    .drow {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 11px 2px; border-bottom: 1px solid var(--line); font-size: 13px;
-    }
-    .drow:last-child { border-bottom: 0; }
-    .drow .name { font-weight: 600; }
-    .pill { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
-    .pill.ok { background: #eaf5ec; color: #2c7a3f; }
-    .pill.wait { background: #fdf3e5; color: #a5691b; }
-    .pill.done { background: #eef1f6; color: #566072; }
-
-    /* ---- Feature section ---- */
-    .eyebrow {
-        color: var(--red); font-weight: 700; font-size: 12.5px;
-        letter-spacing: 0.09em; text-transform: uppercase; margin: 0 0 12px;
-    }
-    .section-head h2 {
-        font-size: 30px; letter-spacing: -0.02em; margin: 0 0 40px; max-width: 620px;
-        line-height: 1.15;
-    }
-    .features {
-        display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
-        padding-bottom: 20px;
-    }
-    .feature {
-        border: 1px solid var(--line); border-radius: 12px; padding: 24px;
-    }
-    .feature .ico {
-        width: 40px; height: 40px; border-radius: 10px;
-        background: #fbeef0; color: var(--red);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px; margin-bottom: 16px;
-    }
-    .feature h3 { font-size: 16px; margin: 0 0 6px; }
-    .feature p { color: var(--muted); font-size: 14px; margin: 0; }
-
-    @media (max-width: 860px) {
-        .hero { grid-template-columns: 1fr; gap: 36px; padding-bottom: 40px; }
-        .hero h1 { font-size: 34px; }
-        .features { grid-template-columns: 1fr; }
-    }
-</style>
-
-<section class="hero">
-    <div>
-        <h1>Manage blood donations and&nbsp;donors with confidence.</h1>
-        <p class="lead">
-            A single platform for donors, hospitals and ambulance teams &mdash;
-            register, sign in by role, and track donation eligibility in real time.
-        </p>
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Get started</a>
-        <a href="{% url 'login' %}" class="btn btn-lg">Sign in</a>
-    </div>
-
-    <div class="preview" aria-hidden="true">
-        <div class="preview-bar"><span></span><span></span><span></span></div>
-        <div class="preview-body">
-            <div class="preview-side">
-                <a class="active">Dashboard</a>
-                <a>Donors</a>
-                <a>Requests</a>
-                <a>Inventory</a>
-                <a>Alerts</a>
-            </div>
-            <div class="preview-main">
-                <div class="stat-row">
-                    <div class="stat"><div class="k">Donors</div><div class="v">128</div></div>
-                    <div class="stat"><div class="k">Requests</div><div class="v">9</div></div>
-                    <div class="stat"><div class="k">Units</div><div class="v">42</div></div>
-                </div>
-                <div class="drow"><span class="name">Amina Wanjiru &middot; O+</span><span class="pill ok">Eligible</span></div>
-                <div class="drow"><span class="name">Brian Otieno &middot; A&minus;</span><span class="pill wait">Pending</span></div>
-                <div class="drow"><span class="name">Grace Achieng &middot; B+</span><span class="pill done">Donated</span></div>
-            </div>
+        <div class="hidden md:flex items-center gap-6 md:gap-10 text-sm">
+            <a href="#top" class="nav-link transition-colors duration-500 text-white hover:text-white/90">Home</a>
+            <a href="#about" class="nav-link transition-colors duration-500 text-white hover:text-white/90">About</a>
+            <a href="#how" class="nav-link transition-colors duration-500 text-white hover:text-white/90">How it works</a>
         </div>
-    </div>
-</section>
 
-<section class="section-head">
-    <p class="eyebrow">Why teams choose us</p>
-    <h2>Built for trust, from the first donor profile to the final unit.</h2>
-</section>
+        <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-md aspect-square font-medium transition cursor-pointer text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16" /><path d="M4 18h16" /><path d="M4 6h16" /></svg>
+        </button>
+    </nav>
 
-<div class="features">
-    <div class="feature">
-        <div class="ico">&#9679;</div>
-        <h3>Multi-role access</h3>
-        <p>Donors, hospitals, ambulance operators and admins each get a dashboard built for their job.</p>
+    <div id="mobile-menu-overlay" class="w-0 md:hidden fixed top-0 z-50 left-0 transition-all duration-300 overflow-hidden h-full bg-white/5 backdrop-blur flex-col justify-center flex items-center gap-6 md:gap-10 text-sm">
+        <a href="#top" class="mobile-nav-link transition-colors duration-500 text-white hover:text-white/90">Home</a>
+        <a href="#about" class="mobile-nav-link transition-colors duration-500 text-white hover:text-white/90">About</a>
+        <a href="#how" class="mobile-nav-link transition-colors duration-500 text-white hover:text-white/90">How it works</a>
+        <button id="mobile-menu-close" class="md:hidden bg-white text-zinc-800 p-2 rounded-md aspect-square font-medium transition cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </button>
     </div>
-    <div class="feature">
-        <div class="ico">&#9673;</div>
-        <h3>Donor management</h3>
-        <p>Track blood type, donation history and contact details in one organised place.</p>
-    </div>
-    <div class="feature">
-        <div class="ico">&#10003;</div>
-        <h3>Eligibility checks</h3>
-        <p>Automatic checks for age, weight and the 56-day rule, so no one is asked too soon.</p>
-    </div>
-</div>
 
-{% endblock %}
+    <main id="top">
+        <!-- Hero -->
+        <section class="relative flex flex-col items-center min-h-screen justify-center bg-black bg-cover bg-center bg-no-repeat px-4 w-full" style="background-image: linear-gradient(rgba(15,17,21,0.45), rgba(15,17,21,0.60)), url('{% static 'img/image1.jpg' %}');">
+            <div class="bg-white/20 backdrop-blur text-sm text-white pl-2 pr-4 py-1 rounded-full flex items-center gap-2 border border-white/20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                <p>Every donation can save up to three lives</p>
+            </div>
+
+            <h1 class="text-5xl md:text-[64px] text-zinc-50 font-medium max-w-3xl text-center mt-5 leading-tight">
+                Give Blood. Save Lives Today.
+            </h1>
+
+            <p class="text-white max-w-120 text-center mt-3">
+                Join a trusted network connecting donors, hospitals and response teams — check your eligibility and book a donation in minutes.
+            </p>
+
+            <div class="flex items-center gap-4 mt-8">
+                <a href="{% url 'register' %}" class="bg-zinc-50 hover:bg-zinc-200 px-6 py-2.5 rounded-md text-zinc-800 text-sm font-medium cursor-pointer transition">
+                    Become a Donor
+                </a>
+                <a href="{% url 'login' %}" class="border border-slate-200 text-zinc-50 px-5 py-2.5 rounded-md text-sm font-medium cursor-pointer transition group">
+                    <div class="relative overflow-hidden">
+                        <span class="block transition-transform duration-200 group-hover:-translate-y-full">Sign in</span>
+                        <span class="absolute top-0 left-0 block transition-transform duration-200 group-hover:translate-y-0 translate-y-full">Sign in</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section id="about" class="py-16 md:py-25 px-4 md:px-16 lg:px-24 xl:px-32 w-full">
+            <div class="flex flex-col items-start max-w-3xl">
+                <div class="flex items-center gap-1.5">
+                    <span class="size-1.5 bg-zinc-900"></span>
+                    <span class="text-sm text-zinc-900">TRUSTED BLOOD NETWORK</span>
+                </div>
+                <h2 class="text-5xl md:text-6xl text-zinc-900 mt-8 leading-tight max-w-152.5">
+                    Connecting Donors to Patients With Confidence
+                </h2>
+                <p class="text-zinc-500 text-sm md:text-base mt-3 max-w-130">
+                    One platform for donors, hospitals and ambulance teams — automating eligibility, blood inventory and emergency delivery so safe blood reaches the patients who need it.
+                </p>
+                <a href="{% url 'register' %}" class="mt-7 bg-zinc-950 hover:bg-zinc-900 text-white px-7 py-3 rounded-full text-sm transition cursor-pointer">
+                    Become a Donor
+                </a>
+            </div>
+        </section>
+
+        <!-- Why Donate With Us -->
+        <section id="how" class="py-16 mt-28 px-4 md:px-16 lg:px-24 xl:px-32 w-full bg-gray-50">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 lg:gap-24">
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-1.5">
+                        <span class="size-1.5 bg-zinc-900"></span>
+                        <span class="text-sm text-zinc-900">WHY DONATE WITH US</span>
+                    </div>
+                    <h2 class="text-3xl md:text-[40px] text-zinc-900 mt-4 leading-tight font-medium max-w-100">
+                        Give With Confidence, From Sign-Up to Delivery
+                    </h2>
+                    <div id="accordion-container" class="flex flex-col gap-4 mt-12 md:mt-16 w-full"></div>
+                </div>
+                <div class="flex flex-col justify-between">
+                    <p class="text-zinc-500 text-sm md:text-base max-w-115 md:mt-20 mb-8">
+                        From automatic eligibility checks to emergency dispatch, every step is handled so donating and managing blood is simple and safe.
+                    </p>
+                    <div id="image-frame" class="relative w-121.5 h-102.75 rounded-xl overflow-hidden shadow-sm bg-zinc-100 max-w-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="py-36 px-4 md:px-16 lg:px-24 xl:px-32 w-full flex flex-col items-center justify-center text-center">
+            <div class="max-w-4xl mx-auto flex flex-col items-center">
+                <h2 class="text-3xl md:text-[40px] text-zinc-800 tracking-tight max-w-130 mb-3">
+                    Ready to Save a Life?
+                </h2>
+                <p class="text-zinc-500 text-sm max-w-100 mb-7">
+                    Create your donor account, check your eligibility, and book a donation at a hospital near you.
+                </p>
+                <a href="{% url 'register' %}" class="bg-black hover:bg-zinc-900 text-white text-sm px-5 py-3.5 rounded-lg transition-all duration-200 flex items-center gap-2 group cursor-pointer">
+                    <span>Become a Donor</span>
+                    <svg class="transition-transform duration-200 group-hover:translate-x-1" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m12 5.336 2.667 2.667L12 10.669M1.334 8h13.333" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-black text-white pt-12 md:pt-16 pb-8 mt-32 px-4 md:px-16 lg:px-24 xl:px-32 w-full overflow-hidden">
+            <div class="max-w-7xl mx-auto relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 pb-16">
+                    <div class="lg:col-span-7 flex flex-col items-start gap-6">
+                        <a href="{% url 'index' %}" class="select-none">
+                            <img src="{% static 'img/logo-remove.png' %}" alt="Blood Donation System" style="height:48px;width:auto;" />
+                        </a>
+                        <p class="text-zinc-300 text-sm/5.5 max-w-md">
+                            Connecting donors, hospitals and response teams so safe blood reaches the patients who need it — quickly and reliably.
+                        </p>
+                    </div>
+                    <div class="lg:col-span-5 flex justify-between gap-8 flex-wrap">
+                        <div class="flex flex-col gap-5">
+                            <span class="text-white">Platform</span>
+                            <div class="flex flex-col gap-3 text-xs text-zinc-300">
+                                <a href="{% url 'index' %}" class="hover:text-white transition-colors duration-200">Home</a>
+                                <a href="{% url 'register' %}" class="hover:text-white transition-colors duration-200">Register</a>
+                                <a href="{% url 'login' %}" class="hover:text-white transition-colors duration-200">Sign in</a>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-5">
+                            <span class="text-white">Built for</span>
+                            <div class="flex flex-col gap-3 text-xs text-zinc-300">
+                                <span>Donors</span>
+                                <span>Hospitals</span>
+                                <span>Ambulance teams</span>
+                                <span>Administrators</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-5">
+                            <span class="text-white">Contact</span>
+                            <div class="flex flex-col gap-3 text-xs text-zinc-300">
+                                <span>info@blooddonation.co.ke</span>
+                                <span>+254 700 000 000</span>
+                                <span>Mon-Fri, 9:00-18:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full h-px bg-zinc-800"></div>
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-5 text-xs text-zinc-300">
+                    <p>Copyright {% now "Y" %} © Blood Donation System. All rights reserved.</p>
+                    <div class="flex items-center gap-6">
+                        <a href="#" class="hover:text-white transition-colors duration-200">Privacy Policy</a>
+                        <a href="#" class="hover:text-white transition-colors duration-200">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script src="{% static 'landing/landing.js' %}"></script>
+</body>
+</html>
