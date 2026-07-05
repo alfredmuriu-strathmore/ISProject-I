@@ -5,3 +5,15 @@ __pycache__/
 venv/
 db.sqlite3
 staticfiles/
+
+# Third-party template source (reference only, not needed at runtime)
+estate-html/
+# Unused placeholder images from the landing template
+static/img/landing/*.png
+static/img/landing/logo-white.svg
+static/img/image3.avif
+# redundant root logo copies (the used ones live in static/img/)
+/logo.jpg
+/logo-remove.png
+# Office temp/lock files
+~$*

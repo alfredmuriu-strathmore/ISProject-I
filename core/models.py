@@ -203,8 +203,14 @@ class Dispatch(models.Model):
 
     request = models.ForeignKey(BloodRequest, on_delete=models.CASCADE, related_name="dispatches")
     ambulance = models.ForeignKey(Ambulance, on_delete=models.CASCADE, related_name="dispatches")
+    source_hospital = models.ForeignKey(
+        Hospital, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="outgoing_dispatches",
+        help_text="Hospital the blood is collected from.",
+    )
     status = models.CharField(max_length=10, choices=STATUS, default="dispatched")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Dispatch {self.ambulance.plate_number} -> {self.request.hospital.name}"
+        source = self.source_hospital.name if self.source_hospital else "stock"
+        return f"Dispatch {self.ambulance.plate_number}: {source} -> {self.request.hospital.name}"

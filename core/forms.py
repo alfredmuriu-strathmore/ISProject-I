@@ -162,4 +162,4 @@ class AdminAppointmentForm(forms.ModelForm):
 class AdminDispatchForm(forms.ModelForm):
     class Meta:
         model = Dispatch
-        fields = ["request", "ambulance", "status"]
+        fields = ["request", "ambulance", "source_hospital", "status"]

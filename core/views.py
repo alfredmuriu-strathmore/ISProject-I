@@ -253,6 +253,38 @@ def fulfill_request(request, request_id):
 
 # ---------- Ambulance dispatch ----------
 
+def _find_source_hospital(blood_request):
+    """Pick a hospital (other than the requester) that has enough matching,
+    unexpired blood units in stock. Prefer the same county."""
+    from django.utils import timezone
+
+    today = timezone.localdate()
+    stocked = Hospital.objects.filter(
+        units__blood_type=blood_request.blood_type,
+        units__is_used=False,
+        units__expiry_date__gte=today,
+    ).exclude(id=blood_request.hospital_id).distinct()
+
+    # Prefer a supplier in the same county, then any supplier.
+    return stocked.filter(county=blood_request.hospital.county).first() or stocked.first()
+
+
+def _reserve_units(source_hospital, blood_request):
+    """Mark up to units_needed matching units at the source as used."""
+    from django.utils import timezone
+
+    today = timezone.localdate()
+    units = BloodUnit.objects.filter(
+        hospital=source_hospital,
+        blood_type=blood_request.blood_type,
+        is_used=False,
+        expiry_date__gte=today,
+    ).order_by("expiry_date")[: blood_request.units_needed]
+    for unit in units:
+        unit.is_used = True
+        unit.save()
+
+
 def dispatch_ambulance(blood_request):
     ambulance = Ambulance.objects.filter(
         county=blood_request.hospital.county, is_available=True
@@ -262,7 +294,12 @@ def dispatch_ambulance(blood_request):
     if ambulance:
         ambulance.is_available = False
         ambulance.save()
-        Dispatch.objects.create(request=blood_request, ambulance=ambulance)
+        source = _find_source_hospital(blood_request)
+        if source:
+            _reserve_units(source, blood_request)
+        Dispatch.objects.create(
+            request=blood_request, ambulance=ambulance, source_hospital=source
+        )
 
 
 def ambulance_dashboard(request):
@@ -282,9 +319,13 @@ def complete_dispatch(request, dispatch_id):
     dispatch = get_object_or_404(Dispatch, id=dispatch_id)
     dispatch.status = "delivered"
     dispatch.save()
+    # Free the ambulance and mark the underlying request fulfilled.
     dispatch.ambulance.is_available = True
     dispatch.ambulance.save()
-    messages.success(request, "Dispatch marked as delivered.")
+    blood_request = dispatch.request
+    blood_request.status = "fulfilled"
+    blood_request.save()
+    messages.success(request, "Dispatch delivered and request fulfilled.")
     return redirect("dashboard")
 
 
@@ -400,10 +441,11 @@ ADMIN_REGISTRY = {
         "form": AdminDispatchForm,
         "singular": "Dispatch",
         "label": "Dispatches",
-        "queryset": lambda: Dispatch.objects.select_related("ambulance", "request__hospital").order_by("-created_at"),
+        "queryset": lambda: Dispatch.objects.select_related("ambulance", "request__hospital", "source_hospital").order_by("-created_at"),
         "columns": [
             ("Ambulance", lambda o: o.ambulance.plate_number),
-            ("Destination", lambda o: o.request.hospital.name),
+            ("From (source)", lambda o: o.source_hospital.name if o.source_hospital else "—"),
+            ("To (destination)", lambda o: o.request.hospital.name),
             ("Status", lambda o: o.get_status_display()),
             ("Created", lambda o: o.created_at.strftime("%Y-%m-%d %H:%M")),
         ],
